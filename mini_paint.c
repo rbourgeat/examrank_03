@@ -7,7 +7,7 @@ typedef struct s_zone
 {
     int width;
     int height;
-    char background;
+    char bg;
 } t_zone;
 
 typedef struct s_list
@@ -35,11 +35,11 @@ int fail(char *str)
     return (1);
 }
 
-int free_all(FILE *file, char *str)
+int free_all(FILE *file, char *draw)
 {
     fclose(file);
-    if (str)
-        free(str);
+    if (draw)
+        free(draw);
     return (1);
 }
 
@@ -48,16 +48,16 @@ char *get_zone(FILE *file, t_zone *zone)
     int i;
     char *array;
 
-    if ((i = fscanf(file, "%d %d %c\n", &zone->width, &zone->height, &zone->background)) != 3)
+    if ((i = fscanf(file, "%d %d %c\n", &zone->width, &zone->height, &zone->bg)) != 3)
         return (NULL);
     if (zone->width <= 0 || zone->width > 300 || zone->height <= 0 || zone->height > 300)
         return (NULL);
     if (!(array = (char *)malloc(sizeof(char) * (zone->width * zone->height))))
         return (NULL);
     i = 0;
-    while (i < (zone->width * zone->height))
+    while (i < zone->width * zone->height)
     {
-        array[i] = zone->background;
+        array[i] = zone->bg;
         i++;
     }
     return (array);
@@ -78,7 +78,7 @@ int is_rad(float x, float y, t_list *tmp)
     return (0);
 }
 
-void get_draw(t_list *tmp, t_zone *zone, char *draw)
+void get_draw(char **draw, t_list *tmp, t_zone *zone)
 {
     int x, y, rad;
 
@@ -90,14 +90,14 @@ void get_draw(t_list *tmp, t_zone *zone, char *draw)
         {
             rad = is_rad((float)x, (float)y, tmp);
             if ((rad == 2 && tmp->type == 'c') || (rad && tmp->type == 'C'))
-                draw[(y * zone->width) + x] = tmp->color;
+                (*draw)[(y * zone->width) + x] = tmp->color;
             x++;
         }
         y++;
     }
 }
 
-int drawing(FILE *file, t_zone *zone, char *draw)
+int drawing(FILE *file, char **draw, t_zone *zone)
 {
     t_list tmp;
     int count;
@@ -106,7 +106,7 @@ int drawing(FILE *file, t_zone *zone, char *draw)
     {
         if (tmp.radius <= 0.00000000 && (tmp.type != 'c' || tmp.type != 'C'))
             return (0);
-        get_draw(&tmp, zone, draw);
+        get_draw(draw, &tmp, zone);
     }
     if (count != (-1))
         return (0);
@@ -127,9 +127,9 @@ void print_draw(char *draw, t_zone *zone)
 
 int main(int ac, char **av)
 {
-    t_zone zone;
-    char *draw;
     FILE *file;
+    char *draw;
+    t_zone zone;
 
     if (ac != 2)
         return (fail("Error: argument\n"));
@@ -137,7 +137,7 @@ int main(int ac, char **av)
         return (fail("Error: Operation file corrupted\n"));
     if (!(draw = get_zone(file, &zone)))
         return (free_all(file, NULL) && fail("Error: Operation file corrupted\n"));
-    if (!(drawing(file, &zone, draw)))
+    if (!(drawing(file, &draw, &zone)))
         return (free_all(file, draw) && fail("Error: Operation file corrupted\n"));
     print_draw(draw, &zone);
     free_all(file, draw);

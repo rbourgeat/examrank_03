@@ -46,27 +46,22 @@ int free_all(FILE *file, char *draw)
 
 char *get_zone(FILE *file, t_zone *zone)
 {
-    int count;
     char *array;
     int i = 0;
 
-    if ((count = fscanf(file, "%d %d %c\n", &zone->width, &zone->height, &zone->bg)) != 3)
+    if ((i = fscanf(file, "%d %d %c\n", &zone->width, &zone->height, &zone->bg)) != 3)
         return (NULL);
     if (zone->width <= 0 || zone->width > 300 || zone->height <= 0 || zone->height > 300)
         return (NULL);
     if (!(array = (char *)malloc(sizeof(char) * (zone->width * zone->height))))
         return (NULL);
+    i = 0;
     while (i < zone->width * zone->height)
     {
         array[i] = zone->bg;
         i++;
     }
     return (array);
-}
-
-int check_tmp(t_list *tmp)
-{
-    return ((tmp->width > 0.00000000 && tmp->height > 0.00000000) && (tmp->type == 'r' || tmp->type == 'R'));
 }
 
 int is_rec(float y, float x, t_list *tmp)
@@ -81,8 +76,7 @@ int is_rec(float y, float x, t_list *tmp)
 
 void get_draw(char **draw, t_list *tmp, t_zone *zone)
 {
-    int x, y;
-    int rec;
+    int x, y, rec;
 
     y = 0;
     while (y < zone->height)
@@ -106,7 +100,7 @@ int drawing(FILE *file, char **draw, t_zone *zone)
 
     while ((count = fscanf(file, "%c %f %f %f %f %c\n", &tmp.type, &tmp.x, &tmp.y, &tmp.width, &tmp.height, &tmp.color)) == 6)
     {
-        if (!(check_tmp(&tmp)))
+	if (tmp.width <= 0.00000000 && tmp.height <= 0.00000000 && (tmp.type == 'r' || tmp.type == 'R'))
             return (0);
         get_draw(draw, &tmp, zone);
     }
