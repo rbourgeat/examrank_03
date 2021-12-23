@@ -100,7 +100,7 @@ int drawing(FILE *file, char **draw, t_zone *zone)
 
     while ((count = fscanf(file, "%c %f %f %f %f %c\n", &tmp.type, &tmp.x, &tmp.y, &tmp.width, &tmp.height, &tmp.color)) == 6)
     {
-	if (tmp.width <= 0.00000000 && tmp.height <= 0.00000000 && (tmp.type == 'r' || tmp.type == 'R'))
+	if (tmp.width <= 0.00000000 && tmp.height <= 0.00000000 && (tmp.type != 'r' || tmp.type != 'R'))
             return (0);
         get_draw(draw, &tmp, zone);
     }
